@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Simple WASM GA</title>
+
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  <link rel="stylesheet" href="styles.scss">
+
+  <script src="index.ts"></script>
+</head>
+
+<body>
+  <main class="bg-gray-100 min-h-screen">
+    <h1 class="title font-bold text-6xl text-center text-gray-900">Simple WASM GA</h1>
+
+    <section class="section flex flex-col items-center md:flex-row md:items-start">
+      <div class="w-5/6 md:w-1/3 m-4 p-4 bg-white rounded-lg overflow-hidden shadow-lg h-auto">
+        <h2 class="text-lg font-bold text-gray-900 mb-2">Colour Picker</h2>
+
+        <hr>
+
+        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold my-2" for="target-colour-input">
+          Target Colour
+        </label>
+        <div class="flex justify-between">
+          <input id="target-colour-input" type="text" value="#81E6D9" minlength="7" maxlength="7"
+            class="appearance-none block bg-gray-200 text-gray-700 border border-gray-200 w-4/5 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" />
+          <div id="target-colour-display" class="w-12 bg-teal-300 rounded"></div>
+        </div>
+
+        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold my-2" for="population-size-input">
+          Population Size
+        </label>
+        <input id="population-size-input" type="number" value="100" min="10" max="1000" step="10"
+          class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" />
+
+        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold my-2" for="mutation-rate-input">
+          Mutation Rate
+        </label>
+        <input id="mutation-rate-input" type="number" value="0.2" min="0" max="1" step="0.05"
+          class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" />
+
+        <!-- TODO: Made buttons disable when running/stopped -->
+        <div class="flex justify-between">
+          <button id="run-button"
+            class="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 mt-4 border-b-4 border-green-700 hover:border-green-500 rounded">
+            Run
+          </button>
+
+          <button id="stop-button"
+            class="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 mt-4 border-b-4 border-red-700 hover:border-red-500 rounded">
+            Stop
+          </button>
+
+          <button id="reset-button"
+            class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 mt-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- TODO: Maybe make this a component so it can listen for start and stop custom events? -->
+      <div id="generation-history-display"
+        class="w-5/6 md:w-2/3 max-h-3/4 md:max-h-3/4 overflow-y-scroll m-4 p-4 bg-white rounded-lg shadow-lg">
+        <h2 class="text-lg font-bold text-gray-900 mb-2">Generation History</h2>
+        <hr>
+
+        <div class="inline-flex items-center w-full my-2 p-4 bg-white rounded-lg overflow-hidden border border-gray-300"
+          generation-display-card>
+          <div>
+            <h3 class="font-bold">No results</h3>
+            <p class="normal-case text-gray-500">Input your parameters and press start to begin!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+
+</html>

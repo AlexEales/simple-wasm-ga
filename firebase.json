@@ -1,0 +1,11 @@
+{
+    "hosting": {
+      "site": "simple-wasm-ga",
+      "public": "dist",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    }
+}

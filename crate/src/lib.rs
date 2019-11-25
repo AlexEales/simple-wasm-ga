@@ -1,9 +1,11 @@
 #[macro_use]
 extern crate cfg_if;
 
-extern crate wasm_bindgen;
-extern crate web_sys;
 use wasm_bindgen::prelude::*;
+
+use rand::prelude::*;
+
+use std::{char, u8};
 
 cfg_if! {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -17,35 +19,67 @@ cfg_if! {
     }
 }
 
-cfg_if! {
-    // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-    // allocator.
-    if #[cfg(feature = "wee_alloc")] {
-        extern crate wee_alloc;
-        #[global_allocator]
-        static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+#[wasm_bindgen]
+pub struct GASimulation {
+    target_colour: String,
+    population_size: u16,
+    mutation_rate: f32,
+    _population: Vec<String>,
+    _running: bool,
+}
+
+#[wasm_bindgen]
+impl GASimulation {
+    #[wasm_bindgen(constructor)]
+    pub fn new(target_colour: String, population_size: u16, mutation_rate: f32) -> GASimulation {
+        // Initialise population to random set of hex codes.
+        let population: Vec<String> = (0..population_size as usize).map(|_| {
+            random_hexcode()
+        }).collect();
+        // Return GASimulation instance.
+        Self {
+            target_colour,
+            population_size,
+            mutation_rate,
+            _population: population,
+            _running: false,
+        }
+    }
+
+    // TODO: Look into converting this into a Future to be returned as a Promise to JS?
+    pub fn simulate_generation(&mut self) {}
+
+    pub fn is_running(&self) -> bool {
+        self._running
+    }
+
+    pub fn get_top_organism(&self) -> String {
+        "".to_string()
+    }
+
+    pub fn get_population(&self) -> Vec<JsValue> {
+        // Exporting a vector of strings is unsupported by wasm-bindgen?
+        self._population.iter().map(JsValue::from).collect()
     }
 }
 
-// Called by our JS entry point to run the example
-#[wasm_bindgen]
-pub fn run() -> Result<(), JsValue> {
-    // If the `console_error_panic_hook` feature is enabled this will set a panic hook, otherwise
-    // it will do nothing.
-    set_panic_hook();
-
-    // Use `web_sys`'s global `window` function to get a handle on the global
-    // window object.
-    let window = web_sys::window().expect("no global `window` exists");
-    let document = window.document().expect("should have a document on window");
-    let body = document.body().expect("document should have a body");
-
-    // Manufacture the element we're gonna append
-    let val = document.create_element("p")?;
-    val.set_inner_html("Hello from Rust, WebAssembly, and Parcel!");
-
-    body.append_child(&val)?;
-
-    Ok(())
+fn random_hexcode() -> String {
+    let mut random = rand::thread_rng();
+    (0..6).map(|_| {
+        char::from_digit(random.gen_range(0, 15), 16).unwrap()
+    }).collect()
 }
 
+#[wasm_bindgen]
+pub fn hex_to_rgb(hex_code: String) -> Vec<u8> {
+    vec![
+        u8::from_str_radix(&hex_code[0..2], 16).unwrap(), // R
+        u8::from_str_radix(&hex_code[2..4], 16).unwrap(), // G
+        u8::from_str_radix(&hex_code[4..6], 16).unwrap(), // B
+    ]
+}
+
+#[wasm_bindgen]
+pub fn hello() -> String {
+    "Hello from Rust 👋".to_string()
+}
