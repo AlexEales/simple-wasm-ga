@@ -11,6 +11,7 @@ pub struct GASimulation {
     mutation_rate: f32,
     _population: Vec<String>,
     _running: bool,
+    _generation_number: u16,
 }
 
 #[wasm_bindgen]
@@ -28,10 +29,10 @@ impl GASimulation {
             mutation_rate,
             _population: population,
             _running: false,
+            _generation_number: 0
         }
     }
 
-    // TODO: Look into converting this into a Future to be returned as a Promise to JS?
     pub fn simulate_generation(&mut self, update_fn: &js_sys::Function) {
         // Order population by fitness
         let mut ordered_pop = self._population.clone();
@@ -42,9 +43,10 @@ impl GASimulation {
         });
         // Call callback, passing top scoring organism value and score.
         let this = JsValue::NULL;
+        let gen_number = JsValue::from(self._generation_number);
         let top_organism_value = JsValue::from(&ordered_pop[0]);
         let top_organism_score = JsValue::from(evaluate_organism(&ordered_pop[0], &self.target_colour) as f32);
-        update_fn.call2(&this, &top_organism_value, &top_organism_score).unwrap();
+        update_fn.call3(&this, &gen_number, &top_organism_value, &top_organism_score).unwrap();
         // Cull bottom 50%
         ordered_pop = ordered_pop[0..self.population_size as usize / 2].to_vec();
         // Crossover and mutate remaining
@@ -60,36 +62,14 @@ impl GASimulation {
         // Set population to be old, culled population plus new organisms
         ordered_pop.append(&mut new_pop);
         self._population = ordered_pop;
-    }
-
-    pub fn is_running(&self) -> bool {
-        self._running
+        // Increment the generation counter.
+        self._generation_number += 1;
     }
 
     pub fn get_population(&self) -> Vec<JsValue> {
         // Exporting a vector of strings is unsupported by wasm-bindgen?
         self._population.iter().map(JsValue::from).collect()
     }
-
-    // fn get_top_organism(&self) -> (String, f64) {
-    //     let mut iterator = self._population
-    //         .iter()
-    //         .enumerate()
-    //         .map(|(idx, organism)| (idx, evaluate_organism(&organism, &self.target_colour)));
-    //     let init = iterator.next().unwrap();
-    //     let top_index = iterator.try_fold(init, |acc, x| {
-    //         let cmp = x.1.partial_cmp(&acc.1)?;
-    //         let min = if let std::cmp::Ordering::Less = cmp {
-    //             x
-    //         } else {
-    //             acc
-    //         };
-    //         Some(min)
-    //     }).unwrap();
-    //     let top_organism = self._population[top_index.0].clone();
-    //     let top_organism_score = evaluate_organism(&top_organism, &self.target_colour);
-    //     (top_organism, top_organism_score)
-    // }
 }
 
 fn random_hexcode() -> String {

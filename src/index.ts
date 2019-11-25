@@ -1,4 +1,7 @@
 import module from '../crate/Cargo.toml';
+import SimulationDisplay from './SimulationDisplay';
+
+// TODO: Add in error checking and a error display (for form validation etc.)
 
 // CONSTANTS
 const TARGET_COLOUR_DEFAULT = '#81E6D9';
@@ -15,32 +18,9 @@ const RUN_BUTTON = document.querySelector('#run-button');
 const STOP_BUTTON = document.querySelector('#stop-button');
 const RESET_BUTTON = document.querySelector('#reset-button');
 
-// TODO: Move generation display to simple component for simplicity (also keeps WASM seperate from page logic).
 const GENERATION_DISPLAY = document.querySelector('#generation-history-display');
-const DEFAULT_GENERATION_CARD = `
-<div class="inline-flex items-center w-full my-2 p-4 bg-white rounded-lg overflow-hidden border border-gray-300"
-        generation-display-card>
-    <div>
-        <h3 class="font-bold">No results</h3>
-        <p class="normal-case text-gray-500">Input your parameters and press start to begin!</p>
-    </div>
-</div>
-`;
 
 // FUNCTIONS
-const createGenerationCard = (generation, colour) => {
-    return `
-    <div class="inline-flex items-center w-full my-2 p-4 bg-white rounded-lg overflow-hidden border border-gray-300"
-            generation-display-card>
-        <div class="w-12 h-12 rounded mr-4" style="background-color: ${colour}"></div>
-        <div>
-            <h3 class="font-bold capitalize">generation ${generation}</h3>
-            <p class="uppercase text-gray-500">${colour}</p>
-        </div>
-    </div>
-    `;
-};
-
 const updateColourDisplay = () => {
     // Update the colour display when input changes.
     let colour = TARGET_COLOUR_INPUT.value;
@@ -50,30 +30,23 @@ const updateColourDisplay = () => {
     TARGET_COLOUR_DISPLAY.style.backgroundColor = colour;
 };
 
-const clearGenerationDisplay = () => {
-    document.querySelectorAll('[generation-display-card]').forEach(
-        elem => elem.parentNode.removeChild(elem)
-    );
-    GENERATION_DISPLAY.insertAdjacentHTML('beforeend', DEFAULT_GENERATION_CARD);
-};
-
 // EVENT LISTENERS
 TARGET_COLOUR_INPUT.addEventListener('change', updateColourDisplay);
 
 RUN_BUTTON.addEventListener('click', () => {
     // TODO: Add form validation
     // TODO: Make this a Event that extends custom event for completion
-    const startSimEvent = new CustomEvent('startSim', { detail: {
+    const startSimEvent = new CustomEvent('startSimulation', { detail: {
         "id": GENERATION_DISPLAY.id,
         "targetColour": TARGET_COLOUR_INPUT.value,
-        "popSize": POPULATION_SIZE_INPUT.value,
-        "mutRate": MUTATION_RATE_INPUT.value
+        "populationSize": POPULATION_SIZE_INPUT.value,
+        "mutationRate": MUTATION_RATE_INPUT.value
      }});
      GENERATION_DISPLAY.dispatchEvent(startSimEvent);
 });
 
 STOP_BUTTON.addEventListener('click', () => {
-    const stopSimEvent = new CustomEvent('stopSim', { detail: GENERATION_DISPLAY.id });
+    const stopSimEvent = new CustomEvent('stopSimulation', { detail: GENERATION_DISPLAY.id });
     GENERATION_DISPLAY.dispatchEvent(stopSimEvent);
 });
 
@@ -85,17 +58,10 @@ RESET_BUTTON.addEventListener('click',  () => {
     updateColourDisplay();
     POPULATION_SIZE_INPUT.value = POPULATION_SIZE_DEFAULT;
     MUTATION_RATE_INPUT.value = MUTATION_RATE_DEFAULT;
-    clearGenerationDisplay();
+    // Dispatc custom event to reset generation display
+    const resetSimEvent = new CustomEvent('resetSimulation', { detail: GENERATION_DISPLAY.id });
+    GENERATION_DISPLAY.dispatchEvent(resetSimEvent);
 });
 
-console.log(module.hello());
-
-let GASim = new module.GASimulation(
-    TARGET_COLOUR_INPUT.value.substring(1),
-    POPULATION_SIZE_INPUT.value,
-    MUTATION_RATE_INPUT.value
-);
-console.log(GASim.get_population());
-GASim.simulate_generation((value, score) => console.log(`${value} scored ${score}`));
-console.log(GASim.get_population());
-GASim.simulate_generation((value, score) => console.log(`${value} scored ${score}`));
+// Attach components
+new SimulationDisplay(GENERATION_DISPLAY);
