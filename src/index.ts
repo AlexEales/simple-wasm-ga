@@ -88,11 +88,11 @@ RESET_BUTTON.addEventListener('click',  () => {
 });
 
 console.log(module.hello());
-console.log(module.hex_to_rgb('ff00ff'));
 
 let GASim = new module.GASimulation(
-    TARGET_COLOUR_INPUT.value,
+    TARGET_COLOUR_INPUT.value.substring(1),
     POPULATION_SIZE_INPUT.value,
     MUTATION_RATE_INPUT.value
 );
 console.log(GASim.get_population());
+GASim.simulate_generation((value, score) => console.log(`${value} scored ${score}`));
