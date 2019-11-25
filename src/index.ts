@@ -96,3 +96,5 @@ let GASim = new module.GASimulation(
 );
 console.log(GASim.get_population());
 GASim.simulate_generation((value, score) => console.log(`${value} scored ${score}`));
+console.log(GASim.get_population());
+GASim.simulate_generation((value, score) => console.log(`${value} scored ${score}`));

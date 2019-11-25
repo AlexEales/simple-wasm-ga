@@ -33,41 +33,63 @@ impl GASimulation {
 
     // TODO: Look into converting this into a Future to be returned as a Promise to JS?
     pub fn simulate_generation(&mut self, update_fn: &js_sys::Function) {
+        // Order population by fitness
+        let mut ordered_pop = self._population.clone();
+        ordered_pop.sort_by(|a, b| {
+            let a_score = evaluate_organism(&a, &self.target_colour);
+            let b_score = evaluate_organism(&b, &self.target_colour);
+            a_score.partial_cmp(&b_score).unwrap()
+        });
+        // Call callback, passing top scoring organism value and score.
         let this = JsValue::NULL;
-        let top_organism = self.get_top_organism();
-        let top_organism_value = JsValue::from(top_organism.0);
-        let top_organism_score = JsValue::from(top_organism.1 as f32);
+        let top_organism_value = JsValue::from(&ordered_pop[0]);
+        let top_organism_score = JsValue::from(evaluate_organism(&ordered_pop[0], &self.target_colour) as f32);
         update_fn.call2(&this, &top_organism_value, &top_organism_score).unwrap();
+        // Cull bottom 50%
+        ordered_pop = ordered_pop[0..self.population_size as usize / 2].to_vec();
+        // Crossover and mutate remaining
+        let mut new_pop: Vec<String> = Vec::new();
+        for organism in ordered_pop.clone() {
+            let mate_idx = rand::thread_rng().gen_range(0, ordered_pop.len());
+            let mut new_organism = crossover(&organism, &ordered_pop[mate_idx]);
+            if rand::thread_rng().gen::<f32>() < self.mutation_rate {
+                new_organism = mutate(new_organism);
+            }
+            new_pop.push(new_organism);
+        }
+        // Set population to be old, culled population plus new organisms
+        ordered_pop.append(&mut new_pop);
+        self._population = ordered_pop;
     }
 
     pub fn is_running(&self) -> bool {
         self._running
     }
 
-    fn get_top_organism(&self) -> (String, f64) {
-        let mut iterator = self._population
-            .iter()
-            .enumerate()
-            .map(|(idx, organism)| (idx, evaluate_organism(&organism, &self.target_colour)));
-        let init = iterator.next().unwrap();
-        let top_index = iterator.try_fold(init, |acc, x| {
-            let cmp = x.1.partial_cmp(&acc.1)?;
-            let min = if let std::cmp::Ordering::Less = cmp {
-                x
-            } else {
-                acc
-            };
-            Some(min)
-        }).unwrap();
-        let top_organism = self._population[top_index.0].clone();
-        let top_organism_score = evaluate_organism(&top_organism, &self.target_colour);
-        (top_organism, top_organism_score)
-    }
-
     pub fn get_population(&self) -> Vec<JsValue> {
         // Exporting a vector of strings is unsupported by wasm-bindgen?
         self._population.iter().map(JsValue::from).collect()
     }
+
+    // fn get_top_organism(&self) -> (String, f64) {
+    //     let mut iterator = self._population
+    //         .iter()
+    //         .enumerate()
+    //         .map(|(idx, organism)| (idx, evaluate_organism(&organism, &self.target_colour)));
+    //     let init = iterator.next().unwrap();
+    //     let top_index = iterator.try_fold(init, |acc, x| {
+    //         let cmp = x.1.partial_cmp(&acc.1)?;
+    //         let min = if let std::cmp::Ordering::Less = cmp {
+    //             x
+    //         } else {
+    //             acc
+    //         };
+    //         Some(min)
+    //     }).unwrap();
+    //     let top_organism = self._population[top_index.0].clone();
+    //     let top_organism_score = evaluate_organism(&top_organism, &self.target_colour);
+    //     (top_organism, top_organism_score)
+    // }
 }
 
 fn random_hexcode() -> String {
@@ -92,6 +114,20 @@ fn evaluate_organism(organism: &String, target: &String) -> f64 {
         .map(|(org_val, target_val)| f64::powf((target_val - org_val) as f64, 2.0)) // Square contents
         .sum::<f64>() // Sum resulting vec
         .sqrt() // Square root result
+}
+
+fn crossover(organism_1: &String, organism_2: &String) -> String {
+    let split_idx = rand::thread_rng().gen_range(0, 5);
+    format!("{}{}", &organism_1[..split_idx], &organism_2[split_idx..])
+}
+
+fn mutate(organism: String) -> String {
+    let mutate_idx = rand::thread_rng().gen_range(0, 5);
+    format!("{}{}{}",
+        &organism[..mutate_idx],
+        char::from_digit(rand::thread_rng().gen_range(0, 15), 16).unwrap(),
+        &organism[(mutate_idx + 1)..]
+    )
 }
 
 #[wasm_bindgen]
