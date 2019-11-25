@@ -15,6 +15,7 @@ const RUN_BUTTON = document.querySelector('#run-button');
 const STOP_BUTTON = document.querySelector('#stop-button');
 const RESET_BUTTON = document.querySelector('#reset-button');
 
+// TODO: Move generation display to simple component for simplicity (also keeps WASM seperate from page logic).
 const GENERATION_DISPLAY = document.querySelector('#generation-history-display');
 const DEFAULT_GENERATION_CARD = `
 <div class="inline-flex items-center w-full my-2 p-4 bg-white rounded-lg overflow-hidden border border-gray-300"
