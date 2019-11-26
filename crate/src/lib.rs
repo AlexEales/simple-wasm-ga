@@ -51,6 +51,7 @@ impl GASimulation {
         // Cull bottom 50%
         ordered_pop = ordered_pop[0..self.population_size as usize / 2].to_vec();
         // Crossover and mutate remaining
+        // TODO: In practive this can result in not converging on small differences so worth throwing some random ones in (crossover 30% maybe?)
         let mut new_pop: Vec<String> = Vec::new();
         for organism in ordered_pop.clone() {
             let mate_idx = rand::thread_rng().gen_range(0, ordered_pop.len());
