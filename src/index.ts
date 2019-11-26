@@ -1,4 +1,3 @@
-import module from '../crate/Cargo.toml';
 import SimulationDisplay from './SimulationDisplay';
 
 // TODO: Add in error checking and a error display (for form validation etc.)
