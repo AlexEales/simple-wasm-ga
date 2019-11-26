@@ -2,6 +2,7 @@ use wasm_bindgen::prelude::*;
 use rand::prelude::*;
 use std::{char, u8, f64};
 
+// TODO: CLEAN UP THIS WHOLE DAMN THING
 // TODO: ERROR CHECK THIS WHOLE DAMN THING.
 // TODO: DOCUMENT THIS WHOLE DAMN THING.
 #[wasm_bindgen]

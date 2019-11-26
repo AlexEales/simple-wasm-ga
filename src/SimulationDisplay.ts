@@ -1,5 +1,7 @@
 import module from '../crate/Cargo.toml';
 
+// TODO: Add in error checking and a error display (for Custom Events etc.)
+
 const GENERATION_CARD_SELECTOR = '[generation-display-card]';
 const DEFAULT_GENERATION_CARD = `
 <div class="inline-flex items-center w-full my-2 p-4 bg-white rounded-lg overflow-hidden border border-gray-300"
@@ -47,7 +49,7 @@ export default class SimulationDisplay {
 
     updateDisplay(generation: number, topValue: string, topScore: number) {
         // If the value is the same as the target then stop the simulation
-        // TODO: Some way of communicating this
+        // TODO: Some way of communicating this (toast popup)
         if (topValue.toUpperCase() === this._target.toUpperCase()) {
             clearInterval(this._simLoop);
         }
