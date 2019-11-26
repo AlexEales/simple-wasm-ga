@@ -8,7 +8,7 @@ const TARGET_COLOUR_DEFAULT = '#81E6D9';
 const TARGET_COLOUR_INPUT: HTMLInputElement = document.querySelector('#target-colour-input');
 const TARGET_COLOUR_DISPLAY: HTMLElement = document.querySelector('#target-colour-display');
 
-const POPULATION_SIZE_DEFAULT = '100';
+const POPULATION_SIZE_DEFAULT = '1000';
 const POPULATION_SIZE_INPUT: HTMLInputElement = document.querySelector('#population-size-input');
 
 const MUTATION_RATE_DEFAULT = '0.2';
@@ -38,7 +38,7 @@ RUN_BUTTON.addEventListener('click', () => {
     // TODO: Make this a Event that extends custom event for completion
     const startSimEvent = new CustomEvent('startSimulation', { detail: {
         "id": GENERATION_DISPLAY.id,
-        "targetColour": TARGET_COLOUR_INPUT.value,
+        "targetColour": TARGET_COLOUR_INPUT.value.substring(1),
         "populationSize": POPULATION_SIZE_INPUT.value,
         "mutationRate": MUTATION_RATE_INPUT.value
      }});

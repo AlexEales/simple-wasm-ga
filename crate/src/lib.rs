@@ -54,7 +54,7 @@ impl GASimulation {
         for organism in ordered_pop.clone() {
             let mate_idx = rand::thread_rng().gen_range(0, ordered_pop.len());
             let mut new_organism = crossover(&organism, &ordered_pop[mate_idx]);
-            if rand::thread_rng().gen::<f32>() < self.mutation_rate {
+            if rand::thread_rng().gen::<f32>() <= self.mutation_rate {
                 new_organism = mutate(new_organism);
             }
             new_pop.push(new_organism);
@@ -97,12 +97,12 @@ fn evaluate_organism(organism: &String, target: &String) -> f64 {
 }
 
 fn crossover(organism_1: &String, organism_2: &String) -> String {
-    let split_idx = rand::thread_rng().gen_range(0, 5);
+    let split_idx = rand::thread_rng().gen_range(0, 6);
     format!("{}{}", &organism_1[..split_idx], &organism_2[split_idx..])
 }
 
 fn mutate(organism: String) -> String {
-    let mutate_idx = rand::thread_rng().gen_range(0, 5);
+    let mutate_idx = rand::thread_rng().gen_range(0, 6);
     format!("{}{}{}",
         &organism[..mutate_idx],
         char::from_digit(rand::thread_rng().gen_range(0, 15), 16).unwrap(),
